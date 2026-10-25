@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 fieldErrors.putIfAbsent(
                         error.getField(),
-                        error.getDefaultMessage()
+                error.getDefaultMessage()));
 
 
         errors.put("message", "Validation failed");

@@ -1,4 +1,4 @@
-package jobtrack.backend.entity;
+package jobtrack.backend.applications;
 
 public enum ApplicationStatus {
 	SAVED,
