@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import jobtrack.backend.applications.ApplicationStatus;
 import jobtrack.backend.applications.JobApplication;
 import jobtrack.backend.applications.JobApplicationRepository;
 import jobtrack.backend.users.User;
@@ -62,6 +63,20 @@ public class JobService {
 	public List<JobApplication> findApplicants(Long jobId, Long recruiterId) {
 		findOwnedJob(jobId, recruiterId);
 		return applicationRepository.findByJob_Id(jobId);
+	}
+
+	public JobApplication updateApplicantStatus(Long jobId, Long applicationId, Long recruiterId,
+			ApplicationStatus status) {
+		findOwnedJob(jobId, recruiterId);
+		JobApplication application = applicationRepository.findById(applicationId).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+						"Application " + applicationId + " was not found"));
+		if (application.getJob() == null || !application.getJob().getId().equals(jobId)) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+					"Application does not belong to this job listing");
+		}
+		application.setStatus(status);
+		return applicationRepository.save(application);
 	}
 
 	private Job findOwnedJob(Long id, Long recruiterId) {

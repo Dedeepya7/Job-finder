@@ -49,8 +49,14 @@ public class JobApplicationService {
 
 	public JobApplication create(Long candidateId, JobApplication application) {
 		application.setId(null);
-		application.setCandidate(findCandidate(candidateId));
-		application.setJob(findJob(application.getJob().getId()));
+		User candidate = findCandidate(candidateId);
+		Job job = findJob(application.getJob().getId());
+		if (repository.existsByCandidate_IdAndJob_Id(candidateId, job.getId())) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT,
+					"You have already applied to this job");
+		}
+		application.setCandidate(candidate);
+		application.setJob(job);
 		return repository.save(application);
 	}
 

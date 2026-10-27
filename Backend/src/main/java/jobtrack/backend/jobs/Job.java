@@ -13,7 +13,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jobtrack.backend.users.User;
 
@@ -33,7 +32,7 @@ public class Job {
 	private String location;
 	@Size(max = 2048)
 	private String jobUrl;
-	@NotNull @ManyToOne(optional = false) @JoinColumn(name = "recruiter_id", nullable = false)
+	@ManyToOne(optional = false) @JoinColumn(name = "recruiter_id", nullable = false)
 	private User recruiter;
 	@Column(nullable = false, updatable = false)
 	private LocalDateTime createdAt;
