@@ -12,6 +12,7 @@ Protected endpoints require `Authorization: Bearer <accessToken>`. Access tokens
 Register request:
 
 ```json
+
 {
 	"name": "Sam Candidate",
 	"email": "sam@example.com",
@@ -29,11 +30,13 @@ Login request:
 }
 ```
 
-Registration stores only a BCrypt password hash. Passwords must be at least 8 characters and no more than 72 UTF-8 bytes. Duplicate email returns `409 Conflict`; invalid login returns a generic `401 Unauthorized` response. The response never includes the password or hash.
+Registration stores only a BCrypt password hash. Passwords must be 8–72 UTF-8 bytes, include an uppercase letter, a lowercase letter, a number, and a special character, and contain no spaces. Duplicate email returns `409 Conflict`; invalid login returns a generic `401 Unauthorized` response. The response never includes the password or hash.
 
-Before starting the backend, set `JWT_SECRET` to a private random value of at least 32 bytes. The backend refuses to start without it; never commit the secret.
+For local setup, run `.\start.ps1` from the `backend` folder. On its first run it creates `backend\.env`; set `DB_PASSWORD` there to your local PostgreSQL password, then run the script again. The script generates and saves a private JWT secret on first startup. The `.env` file is ignored by Git; never share or commit it.
 
-For local PowerShell testing, set it for the current terminal session before running Maven: `$env:JWT_SECRET = 'replace-with-a-private-random-value-at-least-32-bytes'`.
+Run [backend/database/schema.sql](../backend/database/schema.sql) in pgAdmin's Query Tool while connected to `jobtrack_db` to create any missing application tables and indexes. It is safe to rerun and does not delete existing data, but it does not alter tables that already exist if the schema changes. The script does not create the PostgreSQL database itself. In pgAdmin, first create `jobtrack_db` if it does not exist, then open the script and execute it against that database. Keep `spring.jpa.hibernate.ddl-auto=none`; Hibernate will not create or alter the schema.
+
+After setup, start the backend from the `backend` folder with `.\start.ps1`.
 
 ## Jobs
 

@@ -17,9 +17,9 @@ MUI 6 frontend on `:5173`.
 | 2 | Backend | Startup crash even with secret set | Secret shorter than 32 bytes | Fixed (runtime) |
 | 3 | Frontend | Completely blank page | Wrong-cased import `./App.jsx` (Vite is case-sensitive) | Fixed |
 | 4 | Frontend | Blank page + `React is not defined` | No `vite.config.js` → React plugin never loaded | Fixed |
-| 5 | Jobs | Create/Edit job → 400 "Validation failed" | `recruiter` field marked `@NotNull` on request body | Diagnosed (fix pending) |
+| 5 | Jobs | Create/Edit job → 400 "Validation failed" | Request validation ran before the service assigned the authenticated recruiter | Resolved |
 | 6 | Applications | Apply → 400 | Payload missing required `JobApplication` fields | Fixed (frontend) |
-| 7 | Applications | List applications → 500 | `job_applications` table missing `candidate_id` / `job_id` columns | Open (needs DB fix) |
+| 7 | Applications | List applications → 500 | Database schema was missing `candidate_id` / `job_id` columns | Resolved in the current local database; schema verified |
 | 8 | Frontend | Filters/stats showing nothing or wrong | UI referenced backend fields that don't exist | Fixed (frontend) |
 | 9 | Layout | Large empty gap between sidebar & content | Content centered with `maxWidth` + `mx:auto` | Fixed |
 
@@ -34,14 +34,15 @@ MUI 6 frontend on `:5173`.
 no default. `SecurityConfig.secretKey()` also throws if the key is under 32 bytes.
 So the app fails when the variable is unset **or** too short.
 
-**Fix:** Start the backend with a ≥32-byte secret in the same shell:
+**Fix:** The backend startup script reads local settings from `Backend/.env`
+and generates a private JWT secret on first run:
 ```powershell
-$env:JWT_SECRET="jobtrack-dev-secret-key-change-me-please-32bytes"
-cd Backend; .\mvnw.cmd spring-boot:run
+cd Backend
+.\start.ps1
 ```
 
-**Lesson:** The secret is an environment variable, not a code change. Every fresh
-terminal must set it before `spring-boot:run`.
+**Lesson:** Keep the generated secret in the Git-ignored `.env` file. Do not
+commit or share it.
 
 ---
 
@@ -95,9 +96,9 @@ frontend correctly does NOT send a recruiter (the service sets it from the JWT i
 `JobService.create`). Validation runs before the service can populate it, so
 `recruiter == null` fails the check.
 
-**Fix (pending — backend one-liner):** remove `@NotNull` from the `recruiter`
-field in `Job.java`. The DB column stays `NOT NULL` (`@JoinColumn(nullable=false)`)
-and the service still assigns the recruiter before saving.
+**Fix:** The request no longer requires a recruiter value from the client. The
+backend assigns the authenticated recruiter in `JobService.create`; the database
+relationship remains required.
 
 **Note:** `@Size(max = 150)` on `title` / `companyName` / `location` will also
 trigger "Validation failed" if a value is too long.
@@ -116,23 +117,21 @@ trigger "Validation failed" if a value is too long.
 
 ---
 
-## 7 — List applications → 500 (still open)
+## 7 — List applications → 500
 
 **Symptom:** `GET /api/applications` returns 500; backend log shows Hibernate DDL
 warnings at startup.
 
 **Root cause:** The `job_applications` table is missing its `candidate_id` /
-`job_id` foreign-key columns. Hibernate's `ddl-auto=update` couldn't add them as
-`NOT NULL` because the existing rows contain nulls, so the ALTER silently failed
-and the queries reference columns that don't exist.
+`job_id` foreign-key columns. Hibernate schema updates are disabled, so the
+application schema must be managed explicitly.
 
-**Fix (pending — stays on PostgreSQL):** drop the broken table and let Hibernate
-recreate it correctly:
-```sql
-DROP TABLE IF EXISTS job_applications;
-```
-Then restart the backend. This clears the 2 bad rows but does not change the
-database engine (still PostgreSQL).
+**Current status:** The local PostgreSQL database was checked and both foreign
+key columns, along with the expected columns in all three application tables,
+are present. The checked-in `database/schema.sql` creates missing tables and
+indexes without deleting existing data. It does not alter an already-existing
+table; if a future schema change is needed, use a reviewed, data-preserving
+migration. Do not drop the table to fix this issue.
 
 ---
 
@@ -165,25 +164,20 @@ the header.
 
 ---
 
-## How to run the project cleanly
+## How to run the project
 
 **Backend (PowerShell):**
 ```powershell
-$env:JWT_SECRET="jobtrack-dev-secret-key-change-me-please-32bytes"
 cd Backend
-.\mvnw.cmd spring-boot:run
+.\start.ps1
 ```
 
 **Frontend (PowerShell, separate terminal):**
 ```powershell
 cd Frontend
-npm run dev
+npm run dev -- --host 127.0.0.1
 ```
 
 - Backend: http://localhost:8080  (API, headless)
 - Frontend: http://localhost:5173
-- CORS origin is fixed to `http://localhost:5173`.
-
-## Two things still blocking full functionality
-1. **Job posting** — needs the `@NotNull` removal on `recruiter` (backend, #5).
-2. **Applications** — needs the `job_applications` table rebuilt (PostgreSQL, #7).
+- Open the frontend at `http://localhost:5173` so its origin matches backend CORS.

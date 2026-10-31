@@ -45,7 +45,7 @@ class AuthServiceTests {
 	@Test
 	void registerNormalizesEmailHashesPasswordAndReturnsSafeResponse() {
 		RegisterRequest request = new RegisterRequest("Candidate Name", "  Candidate@Example.com ",
-				"correct-horse-battery", UserRole.CANDIDATE);
+				"Correct-horse-battery1!", UserRole.CANDIDATE);
 		when(userRepository.existsByEmailIgnoreCase("candidate@example.com")).thenReturn(false);
 		when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
 			User user = invocation.getArgument(0);
@@ -57,8 +57,8 @@ class AuthServiceTests {
 		verify(userRepository).save(userCaptor.capture());
 		User saved = userCaptor.getValue();
 		assertEquals("candidate@example.com", saved.getEmail());
-		assertNotEquals("correct-horse-battery", saved.getPasswordHash());
-		assertTrue(passwordEncoder.matches("correct-horse-battery", saved.getPasswordHash()));
+		assertNotEquals("Correct-horse-battery1!", saved.getPasswordHash());
+		assertTrue(passwordEncoder.matches("Correct-horse-battery1!", saved.getPasswordHash()));
 		assertEquals(UserRole.CANDIDATE, result.role());
 		assertEquals("candidate@example.com", result.email());
 	}
@@ -67,7 +67,7 @@ class AuthServiceTests {
 	void registerRejectsAnAlreadyUsedEmail() {
 		when(userRepository.existsByEmailIgnoreCase("candidate@example.com")).thenReturn(true);
 		RegisterRequest request = new RegisterRequest("Candidate", "candidate@example.com",
-				"correct-horse-battery", UserRole.CANDIDATE);
+				"Correct-horse-battery1!", UserRole.CANDIDATE);
 		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
 				() -> service.register(request));
 		assertEquals(409, exception.getStatusCode().value());
@@ -79,7 +79,7 @@ class AuthServiceTests {
 		user.setId(8L);
 		user.setName("Recruiter");
 		user.setEmail("recruiter@example.com");
-		user.setPasswordHash(passwordEncoder.encode("correct-horse-battery"));
+		user.setPasswordHash(passwordEncoder.encode("Correct-horse-battery1!"));
 		user.setRole(UserRole.RECRUITER);
 		when(userRepository.findByEmailIgnoreCase("recruiter@example.com")).thenReturn(Optional.of(user));
 		when(jwtEncoder.encode(any(JwtEncoderParameters.class))).thenAnswer(invocation -> {
@@ -87,7 +87,7 @@ class AuthServiceTests {
 			return Jwt.withTokenValue("signed-token").header("alg", "HS256")
 					.issuedAt(now).expiresAt(now.plusSeconds(3600)).build();
 		});
-		var result = service.login(new LoginRequest("Recruiter@Example.com", "correct-horse-battery"));
+		var result = service.login(new LoginRequest("Recruiter@Example.com", "Correct-horse-battery1!"));
 		assertEquals("signed-token", result.accessToken());
 		assertEquals("Bearer", result.tokenType());
 		assertEquals(UserRole.RECRUITER, result.user().role());
@@ -96,7 +96,7 @@ class AuthServiceTests {
 	@Test
 	void loginRejectsWrongPasswordWithGenericUnauthorizedError() {
 		User user = new User();
-		user.setPasswordHash(passwordEncoder.encode("correct-horse-battery"));
+		user.setPasswordHash(passwordEncoder.encode("Correct-horse-battery1!"));
 		when(userRepository.findByEmailIgnoreCase("candidate@example.com")).thenReturn(Optional.of(user));
 		ResponseStatusException exception = assertThrows(ResponseStatusException.class,
 				() -> service.login(new LoginRequest("candidate@example.com", "wrong-password")));

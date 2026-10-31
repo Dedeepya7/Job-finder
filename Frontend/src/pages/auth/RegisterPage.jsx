@@ -5,11 +5,17 @@ import {
   Button,
   Card,
   CardContent,
+  IconButton,
+  InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import RadioButtonUncheckedRoundedIcon from "@mui/icons-material/RadioButtonUncheckedRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import LockRoundedIcon from "@mui/icons-material/LockRounded";
 import { Link, useNavigate } from "react-router-dom";
@@ -26,12 +32,44 @@ function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const passwordByteLength = new TextEncoder().encode(password).length;
+
+  const passwordRequirements = [
+    { label: "At least 8 characters", met: password.length >= 8 },
+    { label: "One uppercase letter", met: /[A-Z]/.test(password) },
+    { label: "One lowercase letter", met: /[a-z]/.test(password) },
+    { label: "One number", met: /\d/.test(password) },
+    {
+      label: "One special character (no spaces)",
+      met: /[^A-Za-z0-9\s]/.test(password) && !/\s/.test(password)
+    }
+  ];
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+
+    if (passwordRequirements.some((requirement) => !requirement.met)) {
+      setError("Please meet all password requirements before continuing.");
+      return;
+    }
+
+    if (passwordByteLength > 72) {
+      setError("Your password must be 72 UTF-8 bytes or fewer.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Your passwords don't match. Please check and try again.");
+      return;
+    }
+
     setLoading(true);
 
     const payload = {
@@ -221,13 +259,93 @@ function RegisterPage() {
 
               <TextField
                 label="Password"
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 autoComplete="new-password"
-                helperText="Pick something only you know — at least 8 characters."
                 required
                 inputProps={{ minLength: 8 }}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword((visible) => !visible)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOffRoundedIcon /> : <VisibilityRoundedIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
+                fullWidth
+              />
+
+              {passwordFocused && (
+                <Box
+                  component="ul"
+                  aria-label="Password requirements"
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                    gap: 1,
+                    m: 0,
+                    mt: -1,
+                    p: 0,
+                    listStyle: "none"
+                  }}
+                >
+                  {passwordRequirements.map(({ label, met }) => (
+                    <Box
+                      component="li"
+                      key={label}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.75,
+                        color: met ? "#26734D" : "#8B8492",
+                        fontSize: "0.76rem"
+                      }}
+                    >
+                      {met ? (
+                        <CheckCircleRoundedIcon sx={{ fontSize: 16 }} />
+                      ) : (
+                        <RadioButtonUncheckedRoundedIcon sx={{ fontSize: 16 }} />
+                      )}
+                      {label}
+                    </Box>
+                  ))}
+                </Box>
+              )}
+
+              <TextField
+                label="Re-enter password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(event) => setConfirmPassword(event.target.value)}
+                autoComplete="new-password"
+                required
+                error={Boolean(confirmPassword) && confirmPassword !== password}
+                helperText={
+                  confirmPassword && confirmPassword !== password
+                    ? "Passwords don't match."
+                    : ""
+                }
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowConfirmPassword((visible) => !visible)}
+                        edge="end"
+                      >
+                        {showConfirmPassword ? <VisibilityOffRoundedIcon /> : <VisibilityRoundedIcon />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
                 fullWidth
               />
 

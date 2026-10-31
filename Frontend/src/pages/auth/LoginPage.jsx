@@ -6,11 +6,16 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  IconButton,
+  InputAdornment,
   MenuItem,
   TextField,
   Typography
 } from "@mui/material";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
 import WorkOutlineRoundedIcon from "@mui/icons-material/WorkOutlineRounded";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -22,6 +27,7 @@ function LoginPage() {
   const [role, setRole] = useState("candidate");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -71,21 +77,26 @@ function LoginPage() {
           display: { xs: "none", md: "flex" },
           flexDirection: "column",
           justifyContent: "center",
-          gap: { md: 5, lg: 7 },
+          gap: { md: 4, lg: 5 },
           p: { md: 5, lg: 8 },
-          borderRight: "1px solid #E4DFE6"
+          position: "relative",
+          overflow: "hidden",
+          color: "#FFFFFF",
+          background:
+            "radial-gradient(circle at 15% 15%, rgba(166,76,110,0.42), transparent 34%), linear-gradient(145deg, #211B25 0%, #382637 52%, #592B48 100%)"
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.6 }}>
           <Box
             sx={{
-              bgcolor: "#2B2530",
+              bgcolor: "rgba(255,255,255,0.12)",
               color: "#fff",
               width: 52,
               height: 52,
               borderRadius: "13px",
               display: "grid",
-              placeItems: "center"
+              placeItems: "center",
+              border: "1px solid rgba(255,255,255,0.16)"
             }}
           >
             <WorkOutlineRoundedIcon sx={{ fontSize: 30 }} />
@@ -93,14 +104,14 @@ function LoginPage() {
 
           <Typography sx={{ fontWeight: 800, fontSize: "2.6rem", letterSpacing: "-0.04em" }}>
             job
-            <Box component="span" sx={{ color: "#A64C6E" }}>finder</Box>
+            <Box component="span" sx={{ color: "#E8AFC7" }}>finder</Box>
           </Typography>
         </Box>
 
         <Box sx={{ maxWidth: 680 }}>
           <Typography
             sx={{
-              color: "#A64C6E",
+              color: "#E8AFC7",
               fontSize: "0.8rem",
               fontWeight: 700,
               letterSpacing: "0.12em",
@@ -115,11 +126,12 @@ function LoginPage() {
             component="h1"
             sx={{
               fontFamily: '"Fraunces", "Manrope", serif',
-              fontSize: { md: "4.4rem", lg: "5.6rem" },
+              fontSize: { md: "3.8rem", lg: "5rem" },
               lineHeight: 1.04,
               letterSpacing: "-0.02em",
               fontWeight: 600,
-              maxWidth: 680
+              maxWidth: 620,
+              color: "#FFFFFF"
             }}
           >
             Good work starts with the right opportunity.
@@ -128,7 +140,7 @@ function LoginPage() {
           <Typography
             sx={{
               mt: 3,
-              color: "#6E6672",
+              color: "rgba(255,255,255,0.72)",
               fontSize: "1.05rem",
               lineHeight: 1.8,
               maxWidth: 480
@@ -139,9 +151,29 @@ function LoginPage() {
           </Typography>
         </Box>
 
-        <Typography sx={{ fontSize: "0.75rem", color: "#8B8492" }}>
-          Find your next step, at your own pace.
-        </Typography>
+        <Box
+          sx={{
+            maxWidth: 510,
+            p: 2.5,
+            borderRadius: 3,
+            border: "1px solid rgba(255,255,255,0.15)",
+            bgcolor: "rgba(255,255,255,0.07)",
+            backdropFilter: "blur(10px)"
+          }}
+        >
+          <Typography sx={{ fontSize: "0.88rem", lineHeight: 1.7, color: "rgba(255,255,255,0.86)" }}>
+            “The right opportunity can change everything. Keep your search
+            focused and your next step within reach.”
+          </Typography>
+          <Typography sx={{ mt: 1.5, fontSize: "0.72rem", color: "#E8AFC7", fontWeight: 700 }}>
+            YOUR CAREER, YOUR NEXT CHAPTER
+          </Typography>
+        </Box>
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, color: "rgba(255,255,255,0.62)" }}>
+          <LockOutlinedIcon sx={{ fontSize: 16 }} />
+          <Typography sx={{ fontSize: "0.75rem" }}>A secure space for your job search</Typography>
+        </Box>
       </Box>
 
       <Box
@@ -151,18 +183,25 @@ function LoginPage() {
           p: { xs: 2, sm: 4 }
         }}
       >
-        <Box sx={{ width: "100%", maxWidth: 420 }}>
-          <Box sx={{ display: { md: "none" }, mb: 5 }}>
-            <Typography sx={{ fontSize: "2.6rem", fontWeight: 800, letterSpacing: "-0.04em" }}>
-              job
-              <Box component="span" sx={{ color: "#A64C6E" }}>finder</Box>
-            </Typography>
+        <Box sx={{ width: "100%", maxWidth: 440 }}>
+          <Box sx={{ display: { md: "none" }, mb: 4 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.1 }}>
+              <Box sx={{ width: 38, height: 38, borderRadius: "11px", bgcolor: "#2B2530", color: "#fff", display: "grid", placeItems: "center" }}>
+                <WorkOutlineRoundedIcon sx={{ fontSize: 22 }} />
+              </Box>
+              <Typography sx={{ fontSize: "1.65rem", fontWeight: 800, letterSpacing: "-0.04em" }}>
+                job<Box component="span" sx={{ color: "#A64C6E" }}>finder</Box>
+              </Typography>
+            </Box>
           </Box>
 
+          <Typography sx={{ mb: 1, color: "#A64C6E", fontSize: "0.72rem", fontWeight: 800, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            Welcome to JobFinder
+          </Typography>
           <Typography
             sx={{
               fontFamily: '"Fraunces", "Manrope", serif',
-              fontSize: "3.1rem",
+              fontSize: { xs: "2.65rem", sm: "3.1rem" },
               fontWeight: 600,
               lineHeight: 1.1,
               letterSpacing: "-0.02em"
@@ -177,11 +216,11 @@ function LoginPage() {
             </Box>
           </Typography>
 
-          <Typography sx={{ mt: 1, mb: 3.5, color: "#6E6672" }}>
-            Sign in to continue to your workspace.
+          <Typography sx={{ mt: 1, mb: 3.5, color: "#6E6672", lineHeight: 1.65 }}>
+            Sign in to pick up where you left off and move your career forward.
           </Typography>
 
-          <Card sx={{ bgcolor: "#FFFFFF" }}>
+          <Card sx={{ bgcolor: "#FFFFFF", border: "1px solid #E9E4EA", borderRadius: 3, boxShadow: "0 20px 55px rgba(43, 37, 48, 0.09)" }}>
             <CardContent sx={{ p: { xs: 2.5, sm: 3.5 } }}>
               {error && (
                 <Alert severity="error" sx={{ mb: 2 }}>
@@ -217,11 +256,24 @@ function LoginPage() {
 
                 <TextField
                   label="Password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
                   autoComplete="current-password"
                   required
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label={showPassword ? "Hide password" : "Show password"}
+                          onClick={() => setShowPassword((visible) => !visible)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOffRoundedIcon /> : <VisibilityRoundedIcon />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
                   fullWidth
                 />
 
@@ -236,7 +288,7 @@ function LoginPage() {
                       <ArrowForwardRoundedIcon />
                     )
                   }
-                  sx={{ mt: 0.5, py: 1.4 }}
+                  sx={{ mt: 0.5, py: 1.5, borderRadius: 2, fontWeight: 700, textTransform: "none", fontSize: "1rem" }}
                 >
                   {loading ? "Signing in..." : "Sign in"}
                 </Button>
